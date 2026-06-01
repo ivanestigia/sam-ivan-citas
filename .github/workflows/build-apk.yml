@@ -21,14 +21,21 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: Unzip Android project
+        run: unzip -o sam-ivan-citas-android.zip -d android-src
+
+      - name: Find project root
+        id: project
+        run: |
+          ROOT=$(find android-src -name settings.gradle -o -name settings.gradle.kts | head -n 1 | xargs dirname)
+          echo "root=$ROOT" >> "$GITHUB_OUTPUT"
 
       - name: Build debug APK
-        run: gradle :app:assembleDebug
+        working-directory: ${{ steps.project.outputs.root }}
+        run: ./gradlew assembleDebug
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: sam-ivan-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: android-src/**/app/build/outputs/apk/debug/*.apk
