@@ -24,11 +24,13 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.10.2
+
       - name: Unzip Android project
         run: unzip -o sam-ivan-citas-android.zip -d android-src
-
-      - name: Show files
-        run: find android-src -maxdepth 4 -type f | sort
 
       - name: Find project root
         id: project
@@ -39,15 +41,7 @@ jobs:
 
       - name: Build debug APK
         working-directory: ${{ steps.project.outputs.root }}
-        run: |
-          if [ -f ./gradlew ]; then
-            chmod +x ./gradlew
-            ./gradlew assembleDebug
-          else
-            sudo apt-get update
-            sudo apt-get install -y gradle
-            gradle assembleDebug
-          fi
+        run: gradle assembleDebug
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
